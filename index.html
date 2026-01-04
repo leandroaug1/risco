@@ -6,229 +6,116 @@
   <title>Guardiões ERP - Qualidade</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  
   <style>
-    body { background-color: #f8f9fa; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #333; }
+    body { background-color: #f8f9fa; font-family: sans-serif; }
     .hidden { display: none !important; }
-    .kpi-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; cursor: pointer; border: 2px solid transparent; }
-    .kpi-card:hover { transform: translateY(-5px); border-color: #0d6efd; }
-    .kpi-card.active { border-color: #0d6efd; background-color: #eef6ff; }
-    .kpi-number { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
-    .text-open { color: #dc3545; } .text-wait { color: #ffc107; } .text-closed { color: #198754; } 
-    
-    .list-item-card { background: white; border-left: 5px solid #dee2e6; border-radius: 8px; margin-bottom: 12px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); cursor: pointer; transition: 0.2s; }
-    .list-item-card:hover { background-color: #f1f1f1; }
-    .status-Aberto { border-left-color: #dc3545; } 
-    .status-Aguardando { border-left-color: #ffc107; } 
-    .status-Fechado { border-left-color: #198754; }
-    .status-Reprovado { border-left-color: #a00; background-color: #fff5f5; }
-
-    .floating-btn { position: fixed; bottom: 30px; right: 30px; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; justify-content: center; border: none; }
-    
-    /* Estilos de Imagens e Modal */
-    .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal-content-card { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-    .img-evidence { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; cursor: zoom-in; border: 1px solid #ddd; transition: 0.2s; }
-    .img-evidence:hover { opacity: 0.8; }
-    .preview-badge { background: #0d6efd; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; display: inline-block; margin-top: 5px; }
+    .kpi-card { background: white; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .kpi-card.active { border-color: #0d6efd; background-color: #f0f7ff; }
+    .kpi-number { font-size: 2rem; font-weight: bold; }
+    .list-item-card { background: white; border-left: 5px solid #dee2e6; border-radius: 8px; margin-bottom: 10px; padding: 15px; cursor: pointer; }
+    .status-Aberto { border-left-color: #dc3545; }
+    .status-Aguardando { border-left-color: #ffc107; }
+    .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+    .modal-card { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; }
+    .btn-evidence { display: block; background: #eef6ff; padding: 10px; margin-top: 5px; border-radius: 5px; text-decoration: none; color: #0d6efd; font-weight: bold; text-align: center; }
   </style>
 </head>
 <body>
 
-  <div id="view-login" class="container mt-5" style="max-width: 450px;">
-    <div class="card border-0 shadow-lg p-4 text-center">
-      <h2 class="text-primary fw-bold mb-4"><i class="fas fa-shield-alt"></i> Guardiões</h2>
-      <div class="form-floating mb-3"><input type="text" id="loginUser" class="form-control" placeholder="Usuário"><label>Usuário</label></div>
-      <div class="form-floating mb-4"><input type="password" id="loginPass" class="form-control" placeholder="Senha"><label>Senha</label></div>
-      <button onclick="doLogin()" id="btnLogin" class="btn btn-primary w-100 py-3 fw-bold">ACESSAR SISTEMA</button>
+  <div id="view-login" class="container mt-5" style="max-width: 400px;">
+    <div class="card p-4 shadow">
+      <h3 class="text-center text-primary fw-bold mb-4">Guardiões</h3>
+      <input type="text" id="loginUser" class="form-control mb-2" placeholder="Usuário">
+      <input type="password" id="loginPass" class="form-control mb-3" placeholder="Senha">
+      <button onclick="doLogin()" id="btnLogin" class="btn btn-primary w-100">ENTRAR</button>
     </div>
   </div>
 
   <div id="view-dashboard" class="hidden">
-    <nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
-      <div class="container">
-        <span class="navbar-brand fw-bold">ERP QUALIDADE</span>
-        <div class="text-white small">Olá, <b id="userName">...</b> <button onclick="logout()" class="btn btn-sm btn-outline-light ms-2"><i class="fas fa-sign-out-alt"></i></button></div>
-      </div>
-    </nav>
-
+    <nav class="navbar navbar-dark bg-primary mb-4"><div class="container"><span class="navbar-brand">ERP QUALIDADE</span></div></nav>
     <div class="container">
-      <div class="row g-3 mb-4">
-        <div class="col-4"><div class="kpi-card" onclick="filterData('Aberto', this)"><div id="kpiOpen" class="kpi-number text-open">0</div><div class="small fw-bold">ABERTOS</div></div></div>
-        <div class="col-4"><div class="kpi-card" onclick="filterData('Aguardando', this)"><div id="kpiWait" class="kpi-number text-wait">0</div><div class="small fw-bold">VALIDAR</div></div></div>
-        <div class="col-4"><div class="kpi-card" onclick="filterData('Fechado', this)"><div id="kpiClosed" class="kpi-number text-closed">0</div><div class="small fw-bold">FECHADOS</div></div></div>
+      <div class="row g-2 mb-4">
+        <div class="col-4"><div class="kpi-card" onclick="filterData('Aberto', this)"><div id="kpiOpen" class="kpi-number text-danger">0</div><div class="small fw-bold">ABERTOS</div></div></div>
+        <div class="col-4"><div class="kpi-card" onclick="filterData('Aguardando', this)"><div id="kpiWait" class="kpi-number text-warning">0</div><div class="small fw-bold">VALIDAR</div></div></div>
+        <div class="col-4"><div class="kpi-card" onclick="filterData('Fechado', this)"><div id="kpiClosed" class="kpi-number text-success">0</div><div class="small fw-bold">FECHADOS</div></div></div>
       </div>
-
-      <div id="loadingDash" class="text-center p-5 hidden"><div class="spinner-border text-primary"></div><p class="mt-2 text-muted">Carregando...</p></div>
-
-      <div id="dashboardContent">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-bold m-0">REGISTROS RECENTES</h6>
-          <button id="btnAll" class="btn btn-sm btn-link hidden" onclick="filterData('all', null)">Ver Todos</button>
-        </div>
-        <div id="listContainer"></div>
-      </div>
+      <div id="listContainer"></div>
     </div>
-    <button onclick="openNewRisk()" class="btn btn-primary floating-btn"><i class="fas fa-plus"></i></button>
-  </div>
-
-  <div id="view-form" class="hidden container mt-3" style="max-width: 650px;">
-    <div class="card shadow border-0 p-4">
-      <h4 class="fw-bold mb-4">Registrar Ocorrência</h4>
-      <div class="mb-3"><label class="small fw-bold">Responsável</label><select id="selAssigned" class="form-select bg-light"></select></div>
-      <div class="row g-2 mb-3">
-        <div class="col-6"><label class="small fw-bold">PN</label><input id="newPn" class="form-control"></div>
-        <div class="col-6"><label class="small fw-bold">OC</label><input id="newOc" class="form-control"></div>
-      </div>
-      <div class="mb-3"><label class="small fw-bold">Descrição</label><textarea id="newDesc" class="form-control" rows="3"></textarea></div>
-      <div class="mb-4">
-        <label class="small fw-bold"><i class="fas fa-paperclip"></i> Evidências (Múltiplos Arquivos)</label>
-        <input type="file" id="fOpen" multiple class="form-control" accept="image/*">
-        <div id="fileStatus" class="preview-badge hidden">0 arquivos carregados</div>
-      </div>
-      <div class="d-grid gap-2">
-        <button onclick="sendRisk()" id="btnSave" class="btn btn-success py-3 fw-bold">SALVAR</button>
-        <button onclick="showDashView()" class="btn btn-light">VOLTAR</button>
-      </div>
-    </div>
+    <button onclick="openNewForm()" class="btn btn-primary shadow" style="position:fixed; bottom:20px; right:20px; border-radius:50%; width:60px; height:60px; font-size:24px;">+</button>
   </div>
 
   <div id="modalDetails" class="custom-modal hidden">
-    <div class="modal-content-card">
-      <div class="d-flex justify-content-between mb-3"><h5 class="fw-bold m-0">Detalhes do Registro</h5><button onclick="closeModal()" class="btn-close"></button></div>
-      <div id="detInfo" class="small mb-3"></div>
-      <h6 class="fw-bold small border-bottom pb-1">EVIDÊNCIAS ANEXADAS:</h6>
-      <div id="detGallery" class="row g-2 mt-2"></div>
-      <div class="d-grid mt-4"><button onclick="closeModal()" class="btn btn-secondary">Fechar</button></div>
+    <div class="modal-card">
+      <h5 class="fw-bold mb-3">Detalhes do Registro</h5>
+      <div id="detContent" class="small mb-3"></div>
+      <div id="detGallery"></div>
+      <button onclick="closeModal()" class="btn btn-secondary w-100 mt-3">Fechar</button>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzQOOiNThkuniU0ZAOwtyTw4xXpBOBf85RdvoZt5lzTNbv1b5xEMkVctMx1ObNjXs8F/exec";
-    let currUser = null;
-    let allData = [];
-    let bufferImages = [];
+    const API_URL = "SUA_URL_DO_GOOGLE_SCRIPT_AQUI"; //
+    let currUser = null, allData = [], bufferImages = [];
 
     async function callBackend(action, payload = {}) {
-      try {
-        const query = `?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&userJson=${encodeURIComponent(JSON.stringify(currUser))}`;
-        if(action === 'saveRisk') {
-          await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action, payload, userJson: JSON.stringify(currUser) }) });
-          return { status: 'success' };
-        }
-        const res = await fetch(API_URL + query);
-        return await res.json();
-      } catch (e) { return { status: 'error' }; }
+      const url = `${API_URL}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&userJson=${encodeURIComponent(JSON.stringify(currUser))}`;
+      if (action === 'saveRisk') {
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action, payload, userJson: JSON.stringify(currUser) }) });
+        return { status: 'success' };
+      }
+      const res = await fetch(url);
+      return await res.json();
     }
 
     async function doLogin() {
       const u = document.getElementById('loginUser').value;
       const p = document.getElementById('loginPass').value;
-      const btn = document.getElementById('btnLogin');
-      btn.disabled = true;
       const res = await callBackend('login', { login: u, password: p });
-      if(res.status === 'success') { currUser = res; document.getElementById('userName').innerText = res.name; loadDash(); }
-      else { alert("Login Inválido"); btn.disabled = false; }
+      if(res.status === 'success') { currUser = res; loadDash(); } else { alert("Erro login"); }
     }
 
     async function loadDash() {
-      hideAll();
+      document.getElementById('view-login').classList.add('hidden');
       document.getElementById('view-dashboard').classList.remove('hidden');
-      document.getElementById('loadingDash').classList.remove('hidden');
       const data = await callBackend('getDashboard');
       allData = [...data.pending, ...data.history];
       document.getElementById('kpiOpen').innerText = data.stats.open;
       document.getElementById('kpiWait').innerText = data.stats.wait;
       document.getElementById('kpiClosed').innerText = data.stats.closed;
       renderList(allData);
-      document.getElementById('loadingDash').classList.add('hidden');
     }
 
     function renderList(items) {
       const container = document.getElementById('listContainer');
-      container.innerHTML = items.length ? '' : '<p class="text-center text-muted py-4">Nenhum registro.</p>';
+      container.innerHTML = '';
       items.forEach(item => {
         const div = document.createElement('div');
         div.className = `list-item-card status-${item.status.split(' ')[0]}`;
         div.onclick = () => showDetails(item);
-        div.innerHTML = `
-          <div class="d-flex justify-content-between small fw-bold"><span>PN: ${item.pn}</span><span class="badge border text-dark">${item.status}</span></div>
-          <div class="small text-muted text-truncate">${item.desc}</div>
-        `;
+        div.innerHTML = `<div class="fw-bold">PN: ${item.pn}</div><div class="small text-muted">${item.desc}</div>`;
         container.appendChild(div);
       });
     }
 
-    function filterData(status, el) {
-      document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
-      if(status === 'all') {
-        renderList(allData);
-        document.getElementById('btnAll').classList.add('hidden');
-      } else {
-        el.classList.add('active');
-        document.getElementById('btnAll').classList.remove('hidden');
-        renderList(allData.filter(i => i.status.includes(status)));
-      }
-    }
-
     function showDetails(item) {
-      document.getElementById('detInfo').innerHTML = `
-        <p class="mb-1"><b>Status:</b> ${item.status}</p>
-        <p class="mb-1"><b>PN:</b> ${item.pn} | <b>OC:</b> ${item.oc || '---'}</p>
-        <p class="mb-1"><b>Descrição:</b> ${item.desc}</p>
-        <p class="mb-1"><b>Solicitante:</b> ${item.opener}</p>
-      `;
+      document.getElementById('detContent').innerHTML = `<b>Status:</b> ${item.status}<br><b>PN:</b> ${item.pn}<br><b>Desc:</b> ${item.desc}`;
       const gallery = document.getElementById('detGallery');
-      gallery.innerHTML = '';
-      if(item.photosData) {
-        try {
-          const photos = JSON.parse(item.photosData);
-          photos.forEach(img => {
-            gallery.innerHTML += `<div class="col-4"><img src="${img}" class="img-evidence" onclick="window.open('${img}')"></div>`;
-          });
-        } catch(e) { gallery.innerHTML = '<p class="text-muted small">Erro ao carregar fotos.</p>'; }
-      } else { gallery.innerHTML = '<p class="text-muted small">Sem fotos.</p>'; }
+      gallery.innerHTML = '<h6 class="fw-bold mt-2">Evidências:</h6>';
+      if(item.photosOpen) {
+        item.photosOpen.split(',').forEach((link, i) => {
+          gallery.innerHTML += `<a href="${link}" target="_blank" class="btn-evidence">Ver Foto ${i+1}</a>`;
+        });
+      } else { gallery.innerHTML += '<p class="small text-muted">Sem anexos.</p>'; }
       document.getElementById('modalDetails').classList.remove('hidden');
     }
 
-    // Gerenciador de Anexos Acumulativo
-    document.getElementById('fOpen').onchange = (e) => {
-      Array.from(e.target.files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          bufferImages.push(ev.target.result);
-          document.getElementById('fileStatus').innerText = `${bufferImages.length} arquivos carregados`;
-          document.getElementById('fileStatus').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-      });
-    };
-
-    async function sendRisk() {
-      const btn = document.getElementById('btnSave');
-      btn.disabled = true; btn.innerText = 'ENVIANDO...';
-      const payload = { form: {
-        assignedTo: document.getElementById('selAssigned').value,
-        pn: document.getElementById('newPn').value,
-        oc: document.getElementById('newOc').value,
-        desc: document.getElementById('newDesc').value,
-        photosData: JSON.stringify(bufferImages)
-      }};
-      await callBackend('saveRisk', payload);
-      alert("Sucesso!");
-      bufferImages = []; loadDash();
+    function filterData(status, el) {
+      document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderList(allData.filter(i => i.status.includes(status)));
     }
 
-    function hideAll() { document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden')); }
-    function showDashView() { hideAll(); document.getElementById('view-dashboard').classList.remove('hidden'); }
     function closeModal() { document.getElementById('modalDetails').classList.add('hidden'); }
-    function logout() { location.reload(); }
-    async function openNewRisk() {
-      hideAll(); document.getElementById('view-form').classList.remove('hidden');
-      bufferImages = []; document.getElementById('fileStatus').classList.add('hidden');
-      const guardians = await callBackend('getGuardians');
-      document.getElementById('selAssigned').innerHTML = guardians.map(g => `<option value="${g.label}">${g.label}</option>`).join('');
-    }
   </script>
 </body>
 </html>
