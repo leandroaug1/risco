@@ -6,7 +6,6 @@
   <title>Guardiões ERP - Qualidade</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
     body { background-color: #f8f9fa; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #333; }
@@ -24,9 +23,11 @@
     .status-Reprovado { border-left-color: #a00; background-color: #fff5f5; }
     .floating-btn { position: fixed; bottom: 30px; right: 30px; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; justify-content: center; border: none; }
     
-    /* Modal Custom */
-    .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-    .modal-content-card { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    /* Modal e Imagens */
+    .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 15px; }
+    .modal-content-card { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
+    .img-evidence { width: 100%; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; cursor: zoom-in; }
+    .preview-badge { font-size: 0.75rem; background: #0d6efd; color: white; padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; }
   </style>
 </head>
 <body>
@@ -35,7 +36,6 @@
     <div class="card border-0 shadow-lg p-4">
       <div class="text-center mb-4">
         <h2 class="text-primary fw-bold"><i class="fas fa-shield-alt"></i> Guardiões</h2>
-        <p class="text-muted small">Qualidade & Segurança</p>
       </div>
       <div class="form-floating mb-3">
         <input type="text" id="loginUser" class="form-control" placeholder="Usuário">
@@ -45,269 +45,225 @@
         <input type="password" id="loginPass" class="form-control" placeholder="Senha">
         <label>Senha</label>
       </div>
-      <button onclick="doLogin()" id="btnLogin" class="btn btn-primary w-100 py-3 fw-bold">ACESSAR SISTEMA</button>
+      <button onclick="doLogin()" id="btnLogin" class="btn btn-primary w-100 py-3 fw-bold">ACESSAR</button>
     </div>
   </div>
 
   <div id="view-dashboard" class="hidden">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
       <div class="container">
-        <span class="navbar-brand fw-bold"><i class="fas fa-cube"></i> ERP QUALIDADE</span>
-        <div class="d-flex align-items-center text-white gap-3">
-          <span class="small">Olá, <b id="userName">Usuário</b></span>
-          <button onclick="logout()" class="btn btn-sm btn-outline-light"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
+        <span class="navbar-brand fw-bold">ERP QUALIDADE</span>
+        <button onclick="logout()" class="btn btn-sm btn-outline-light"><i class="fas fa-sign-out-alt"></i></button>
       </div>
     </nav>
 
     <div class="container">
       <div class="row g-3 mb-4">
-        <div class="col-4">
-            <div class="kpi-card" onclick="filterByStatus('Aberto', this)">
-                <div id="kpiOpen" class="kpi-number text-open">0</div>
-                <div class="small text-muted fw-bold">ABERTOS</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="kpi-card" onclick="filterByStatus('Aguardando', this)">
-                <div id="kpiWait" class="kpi-number text-wait">0</div>
-                <div class="small text-muted fw-bold">VALIDAR</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="kpi-card" onclick="filterByStatus('Fechado', this)">
-                <div id="kpiClosed" class="kpi-number text-closed">0</div>
-                <div class="small text-muted fw-bold">FECHADOS</div>
-            </div>
-        </div>
+        <div class="col-4"><div class="kpi-card" onclick="filterByStatus('Aberto', this)"><div id="kpiOpen" class="kpi-number text-open">0</div><div class="small fw-bold">ABERTOS</div></div></div>
+        <div class="col-4"><div class="kpi-card" onclick="filterByStatus('Aguardando', this)"><div id="kpiWait" class="kpi-number text-wait">0</div><div class="small fw-bold">VALIDAR</div></div></div>
+        <div class="col-4"><div class="kpi-card" onclick="filterByStatus('Fechado', this)"><div id="kpiClosed" class="kpi-number text-closed">0</div><div class="small fw-bold">FECHADOS</div></div></div>
       </div>
 
-      <div id="loadingDash" class="text-center p-5 hidden">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2 text-muted">Sincronizando dados...</p>
-      </div>
+      <div id="loadingDash" class="text-center p-5 hidden"><div class="spinner-border text-primary"></div></div>
 
       <div id="dashboardContent">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="text-muted fw-bold m-0"><i class="fas fa-list"></i> REGISTROS</h6>
-            <button class="btn btn-sm btn-link text-decoration-none hidden" id="btnClearFilter" onclick="clearFilter()">Ver todos</button>
+        <div class="d-flex justify-content-between mb-3">
+            <h6 class="fw-bold">REGISTROS</h6>
+            <button class="btn btn-sm btn-link hidden" id="btnClearFilter" onclick="clearFilter()">Ver todos</button>
         </div>
         <div id="listPending"></div>
       </div>
     </div>
-
-    <button onclick="openNewRisk()" class="btn btn-primary floating-btn">
-      <i class="fas fa-plus"></i>
-    </button>
+    <button onclick="openNewRisk()" class="btn btn-primary floating-btn"><i class="fas fa-plus"></i></button>
   </div>
 
   <div id="view-form" class="hidden container mt-3" style="max-width: 650px;">
     <div class="card shadow border-0 p-4">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold m-0">Registrar Ocorrência</h4>
-        <button onclick="showDashView()" class="btn-close"></button>
-      </div>
-      
+      <h4 class="fw-bold mb-4">Nova Ocorrência</h4>
       <div class="mb-3">
-        <label class="form-label small fw-bold">Responsável pela Tratativa</label>
+        <label class="small fw-bold">Responsável</label>
         <select id="selAssigned" class="form-select bg-light"></select>
       </div>
-
       <div class="row g-2 mb-3">
-        <div class="col-6"><label class="small fw-bold">Part Number (PN)</label><input id="newPn" class="form-control"></div>
-        <div class="col-6"><label class="small fw-bold">Ordem (OC)</label><input id="newOc" class="form-control"></div>
+        <div class="col-6"><label class="small fw-bold">PN</label><input id="newPn" class="form-control"></div>
+        <div class="col-6"><label class="small fw-bold">OC</label><input id="newOc" class="form-control"></div>
       </div>
-
       <div class="mb-3">
-        <label class="small fw-bold">Descrição do Desvio</label>
-        <textarea id="newDesc" class="form-control" rows="4"></textarea>
+        <label class="small fw-bold">Descrição</label>
+        <textarea id="newDesc" class="form-control" rows="3"></textarea>
       </div>
-
       <div class="mb-4">
-        <label class="small fw-bold"><i class="fas fa-camera"></i> Evidências Fotográficas</label>
+        <label class="small fw-bold"><i class="fas fa-paperclip"></i> Anexar Fotos (Ilimitado)</label>
         <input type="file" id="fOpen" multiple class="form-control" accept="image/*">
+        <div id="fileCount" class="preview-badge hidden">0 arquivos selecionados</div>
       </div>
-
       <div class="d-grid gap-2">
-        <button onclick="sendRisk()" id="btnSave" class="btn btn-success py-3 fw-bold">SALVAR OCORRÊNCIA</button>
-        <button onclick="showDashView()" class="btn btn-light">CANCELAR</button>
+        <button onclick="sendRisk()" id="btnSave" class="btn btn-success py-3 fw-bold">ENVIAR</button>
+        <button onclick="showDashView()" class="btn btn-light">VOLTAR</button>
       </div>
     </div>
   </div>
 
   <div id="modalDetails" class="custom-modal hidden">
       <div class="modal-content-card">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-              <h5 class="fw-bold m-0" id="detTitle">Detalhes do Registro</h5>
+          <div class="d-flex justify-content-between mb-3">
+              <h5 class="fw-bold m-0">Detalhes da Ocorrência</h5>
               <button onclick="closeModal()" class="btn-close"></button>
           </div>
-          <div id="detBody" class="small">
-              </div>
-          <hr>
-          <div class="d-grid">
-              <button onclick="closeModal()" class="btn btn-primary">Fechar</button>
+          <div id="detBody" class="small"></div>
+          <div id="detImages" class="mt-3">
+              <h6 class="fw-bold small border-bottom pb-1">ANEXOS / EVIDÊNCIAS:</h6>
+              <div id="imageGallery" class="row g-2 mt-1"></div>
+          </div>
+          <div class="d-grid mt-4">
+              <button onclick="closeModal()" class="btn btn-secondary">Fechar</button>
           </div>
       </div>
   </div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzQOOiNThkuniU0ZAOwtyTw4xXpBOBf85RdvoZt5lzTNbv1b5xEMkVctMx1ObNjXs8F/exec";
-    
     let currUser = null;
-    let bufferImages = [];
-    let allRecords = []; // Cache para cross-filter
+    let bufferImages = []; // Buffer para múltiplos anexos
+    let allRecords = [];
 
     async function callBackend(action, payload = {}) {
       try {
-        if (action === 'login' || action === 'getDashboard' || action === 'getGuardians') {
-           const res = await fetch(`${API_URL}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&userJson=${encodeURIComponent(JSON.stringify(currUser))}`);
-           return await res.json();
+        const params = `?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&userJson=${encodeURIComponent(JSON.stringify(currUser))}`;
+        if (action === 'saveRisk') {
+             await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action, payload, userJson: JSON.stringify(currUser) }) });
+             return { status: 'success' };
         }
-        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action, payload, userJson: JSON.stringify(currUser) }) });
-        return { status: 'success' };
-      } catch (e) {
-        return { status: 'error', message: 'Falha de conexão.' };
-      }
+        const res = await fetch(API_URL + params);
+        return await res.json();
+      } catch (e) { return { status: 'error' }; }
     }
 
     async function doLogin() {
       const u = document.getElementById('loginUser').value;
       const p = document.getElementById('loginPass').value;
       const btn = document.getElementById('btnLogin');
-      if(!u || !p) return alert("Preencha os campos!");
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Autenticando...';
       const res = await callBackend('login', { login: u, password: p });
-      if(res.status === 'success') {
-        currUser = res;
-        document.getElementById('userName').innerText = res.name;
-        loadDash();
-      } else {
-        alert("Erro no login.");
-        btn.disabled = false;
-        btn.innerText = 'ACESSAR SISTEMA';
-      }
+      if(res.status === 'success') { currUser = res; loadDash(); } 
+      else { alert("Falha no login"); btn.disabled = false; }
     }
 
     async function loadDash() {
       hideAll();
       document.getElementById('view-dashboard').classList.remove('hidden');
       document.getElementById('loadingDash').classList.remove('hidden');
-      document.getElementById('dashboardContent').classList.add('hidden');
-
       const data = await callBackend('getDashboard');
-      allRecords = [...data.pending, ...data.history]; // Unifica para facilitar filtros
-      
+      allRecords = [...data.pending, ...data.history];
       document.getElementById('kpiOpen').innerText = data.stats.open;
       document.getElementById('kpiWait').innerText = data.stats.wait;
       document.getElementById('kpiClosed').innerText = data.stats.closed;
-
       renderList(allRecords);
-
       document.getElementById('loadingDash').classList.add('hidden');
       document.getElementById('dashboardContent').classList.remove('hidden');
     }
 
     function renderList(items) {
       const container = document.getElementById('listPending');
-      container.innerHTML = items.length ? '' : '<p class="text-muted small text-center p-4">Nenhum registro encontrado.</p>';
-      
-      items.forEach((r, index) => {
-        const statusClass = r.status.includes('Aberto') ? 'status-Aberto' : (r.status.includes('Aguardando') ? 'status-Aguardando' : (r.status.includes('Reprovado') ? 'status-Reprovado' : 'status-Fechado'));
-        
-        const card = document.createElement('div');
-        card.className = `list-item-card ${statusClass}`;
-        card.onclick = () => showDetails(r); // Adiciona o evento de clique
-        card.innerHTML = `
-            <div class="d-flex justify-content-between small fw-bold mb-1">
-              <span>PN: ${r.pn}</span>
-              <span class="badge bg-light text-dark border">${r.status}</span>
-            </div>
+      container.innerHTML = '';
+      items.forEach(r => {
+        const div = document.createElement('div');
+        div.className = `list-item-card status-${r.status.split(' ')[0]}`;
+        div.onclick = () => showDetails(r);
+        div.innerHTML = `
+            <div class="d-flex justify-content-between small fw-bold"><span>PN: ${r.pn}</span><span class="badge border text-dark">${r.status}</span></div>
             <div class="small text-muted text-truncate">${r.desc}</div>
-            <div class="mt-2 text-end" style="font-size: 0.7rem;">Solicitado por: ${r.opener}</div>
         `;
-        container.appendChild(card);
+        container.appendChild(div);
       });
     }
 
-    // CROSS-FILTER LOGIC
-    function filterByStatus(statusName, element) {
-        document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
-        element.classList.add('active');
-        document.getElementById('btnClearFilter').classList.remove('hidden');
-
-        const filtered = allRecords.filter(r => r.status.includes(statusName));
-        renderList(filtered);
-    }
-
-    function clearFilter() {
-        document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
-        document.getElementById('btnClearFilter').classList.add('hidden');
-        renderList(allRecords);
-    }
-
-    // MODAL DETAILS LOGIC
     function showDetails(item) {
-        const modal = document.getElementById('modalDetails');
-        const body = document.getElementById('detBody');
-        
-        body.innerHTML = `
-            <p><b>Status:</b> ${item.status}</p>
-            <p><b>PN:</b> ${item.pn}</p>
-            <p><b>Ordem:</b> ${item.oc || 'N/A'}</p>
-            <hr>
-            <p><b>Descrição:</b><br>${item.desc}</p>
-            <hr>
-            <p><b>Solicitante:</b> ${item.opener}</p>
-            <p><b>Responsável:</b> ${item.assignedTo || 'Não atribuído'}</p>
+        document.getElementById('detBody').innerHTML = `
+            <p class="mb-1"><b>Status:</b> ${item.status}</p>
+            <p class="mb-1"><b>PN:</b> ${item.pn} | <b>OC:</b> ${item.oc || '---'}</p>
+            <p class="mb-1"><b>Descrição:</b> ${item.desc}</p>
+            <p class="mb-1"><b>Solicitante:</b> ${item.opener}</p>
         `;
         
-        modal.classList.remove('hidden');
+        const gallery = document.getElementById('imageGallery');
+        gallery.innerHTML = '';
+        
+        // Tenta ler as fotos do registro (campo fotosData vindo do AppScript)
+        if (item.photosData) {
+            try {
+                const photos = JSON.parse(item.photosData);
+                photos.forEach(src => {
+                    gallery.innerHTML += `<div class="col-6"><img src="${src}" class="img-evidence" onclick="window.open('${src}')"></div>`;
+                });
+            } catch(e) { gallery.innerHTML = '<p class="text-muted small">Sem anexos ou erro ao carregar.</p>'; }
+        } else {
+            gallery.innerHTML = '<p class="text-muted small">Nenhuma imagem anexada.</p>';
+        }
+
+        document.getElementById('modalDetails').classList.remove('hidden');
     }
 
-    function closeModal() {
-        document.getElementById('modalDetails').classList.add('hidden');
-    }
+    // Gerenciador de Anexos (Acumulativo - "Infinito")
+    document.getElementById('fOpen').onchange = (e) => {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            bufferImages.push(ev.target.result);
+            updateFileLabel();
+        };
+        reader.readAsDataURL(file);
+      });
+    };
 
-    async function openNewRisk() {
-      hideAll();
-      document.getElementById('view-form').classList.remove('hidden');
-      const guardians = await callBackend('getGuardians');
-      const sel = document.getElementById('selAssigned');
-      sel.innerHTML = guardians.map(g => `<option value="${g.label}">${g.label}</option>`).join('');
+    function updateFileLabel() {
+        const label = document.getElementById('fileCount');
+        label.innerText = `${bufferImages.length} anexo(s) carregado(s)`;
+        label.classList.remove('hidden');
     }
 
     async function sendRisk() {
       const btn = document.getElementById('btnSave');
+      btn.disabled = true;
+      btn.innerText = 'ENVIANDO...';
+      
       const payload = {
         form: {
           assignedTo: document.getElementById('selAssigned').value,
           pn: document.getElementById('newPn').value,
           oc: document.getElementById('newOc').value,
           desc: document.getElementById('newDesc').value,
-          photosData: JSON.stringify(bufferImages)
+          photosData: JSON.stringify(bufferImages) // Envia o array completo
         }
       };
-      btn.disabled = true;
-      btn.innerText = 'ENVIANDO...';
+
       await callBackend('saveRisk', payload);
-      alert("Sucesso! Registro enviado.");
-      bufferImages = [];
+      alert("Sucesso!");
+      bufferImages = []; // Limpa o buffer após enviar
       loadDash();
     }
 
+    // Utilitários
+    function filterByStatus(s, el) {
+        document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('btnClearFilter').classList.remove('hidden');
+        renderList(allRecords.filter(r => r.status.includes(s)));
+    }
+    function clearFilter() { renderList(allRecords); document.getElementById('btnClearFilter').classList.add('hidden'); }
+    function closeModal() { document.getElementById('modalDetails').classList.add('hidden'); }
     function hideAll() { document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden')); }
     function showDashView() { hideAll(); document.getElementById('view-dashboard').classList.remove('hidden'); }
+    async function openNewRisk() {
+        hideAll();
+        document.getElementById('view-form').classList.remove('hidden');
+        document.getElementById('fileCount').classList.add('hidden');
+        bufferImages = [];
+        const guardians = await callBackend('getGuardians');
+        document.getElementById('selAssigned').innerHTML = guardians.map(g => `<option value="${g.label}">${g.label}</option>`).join('');
+    }
     function logout() { location.reload(); }
-
-    document.getElementById('fOpen').onchange = (e) => {
-      bufferImages = [];
-      Array.from(e.target.files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (ev) => bufferImages.push(ev.target.result);
-        reader.readAsDataURL(file);
-      });
-    };
   </script>
 </body>
 </html>
