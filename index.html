@@ -1,121 +1,130 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guardiões ERP - Qualidade</title>
+  <base target="_top">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; font-family: sans-serif; }
-    .hidden { display: none !important; }
-    .kpi-card { background: white; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .kpi-card.active { border-color: #0d6efd; background-color: #f0f7ff; }
-    .kpi-number { font-size: 2rem; font-weight: bold; }
-    .list-item-card { background: white; border-left: 5px solid #dee2e6; border-radius: 8px; margin-bottom: 10px; padding: 15px; cursor: pointer; }
-    .status-Aberto { border-left-color: #dc3545; }
-    .status-Aguardando { border-left-color: #ffc107; }
-    .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-    .modal-card { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; }
-    .btn-evidence { display: block; background: #eef6ff; padding: 10px; margin-top: 5px; border-radius: 5px; text-decoration: none; color: #0d6efd; font-weight: bold; text-align: center; }
+    body { background: #f4f7f6; font-family: sans-serif; }
+    .card-login { max-width: 400px; margin: 80px auto; border-radius: 15px; }
+    .hidden { display: none; }
+    .btn-primary { background-color: #0056b3; }
   </style>
 </head>
 <body>
+<div class="container">
 
-  <div id="view-login" class="container mt-5" style="max-width: 400px;">
+  <div id="box-login" class="card card-login shadow p-4">
+    <h3 class="text-center mb-4">ERP Riscos</h3>
+    <input type="text" id="user" class="form-control mb-3" placeholder="Usuário">
+    <input type="password" id="pass" class="form-control mb-3" placeholder="Senha">
+    <button onclick="fazerLogin()" class="btn btn-primary w-100">Entrar</button>
+    <button onclick="abrirCadastro()" class="btn btn-link w-100 mt-2">Criar conta</button>
+  </div>
+
+  <div id="box-cadastro" class="card card-login shadow p-4 hidden">
+    <h4 class="mb-3">Solicitar Acesso</h4>
+    <input type="text" id="reg-nome" class="form-control mb-2" placeholder="Nome Completo">
+    <input type="text" id="reg-login" class="form-control mb-2" placeholder="Login desejado">
+    <input type="password" id="reg-pass" class="form-control mb-2" placeholder="Senha">
+    <input type="text" id="reg-dep" class="form-control mb-3" placeholder="Departamento">
+    <button onclick="salvarUsuario()" class="btn btn-success w-100">Enviar para Aprovação</button>
+    <button onclick="location.reload()" class="btn btn-light w-100 mt-2">Voltar</button>
+  </div>
+
+  <div id="box-adm" class="mt-5 hidden">
+    <div class="d-flex justify-content-between">
+      <h2>Painel Administrativo</h2>
+      <button onclick="location.reload()" class="btn btn-outline-danger">Sair</button>
+    </div>
+    <div id="lista-pendentes" class="mt-4 row"></div>
+  </div>
+
+  <div id="box-user" class="mt-5 hidden">
     <div class="card p-4 shadow">
-      <h3 class="text-center text-primary fw-bold mb-4">Guardiões</h3>
-      <input type="text" id="loginUser" class="form-control mb-2" placeholder="Usuário">
-      <input type="password" id="loginPass" class="form-control mb-3" placeholder="Senha">
-      <button onclick="doLogin()" id="btnLogin" class="btn btn-primary w-100">ENTRAR</button>
-    </div>
-  </div>
-
-  <div id="view-dashboard" class="hidden">
-    <nav class="navbar navbar-dark bg-primary mb-4"><div class="container"><span class="navbar-brand">ERP QUALIDADE</span></div></nav>
-    <div class="container">
-      <div class="row g-2 mb-4">
-        <div class="col-4"><div class="kpi-card" onclick="filterData('Aberto', this)"><div id="kpiOpen" class="kpi-number text-danger">0</div><div class="small fw-bold">ABERTOS</div></div></div>
-        <div class="col-4"><div class="kpi-card" onclick="filterData('Aguardando', this)"><div id="kpiWait" class="kpi-number text-warning">0</div><div class="small fw-bold">VALIDAR</div></div></div>
-        <div class="col-4"><div class="kpi-card" onclick="filterData('Fechado', this)"><div id="kpiClosed" class="kpi-number text-success">0</div><div class="small fw-bold">FECHADOS</div></div></div>
+      <h3>Novo Apontamento de Risco</h3>
+      <p class="text-muted">Preencha os dados abaixo para notificar o Guardião da Tratativa.</p>
+      <div class="row">
+        <div class="col-md-6 mb-2"><input type="text" id="pn" class="form-control" placeholder="PN (Part Number)"></div>
+        <div class="col-md-6 mb-2"><input type="text" id="oc" class="form-control" placeholder="OC (Ordem de Compra)"></div>
+        <div class="col-12 mb-2"><input type="text" id="destino" class="form-control" placeholder="Quem deve tratar? (Nome do Usuário)"></div>
+        <div class="col-12 mb-3"><textarea id="desc" class="form-control" rows="4" placeholder="Descrição detalhada do risco"></textarea></div>
       </div>
-      <div id="listContainer"></div>
-    </div>
-    <button onclick="openNewForm()" class="btn btn-primary shadow" style="position:fixed; bottom:20px; right:20px; border-radius:50%; width:60px; height:60px; font-size:24px;">+</button>
-  </div>
-
-  <div id="modalDetails" class="custom-modal hidden">
-    <div class="modal-card">
-      <h5 class="fw-bold mb-3">Detalhes do Registro</h5>
-      <div id="detContent" class="small mb-3"></div>
-      <div id="detGallery"></div>
-      <button onclick="closeModal()" class="btn btn-secondary w-100 mt-3">Fechar</button>
+      <button onclick="enviarChamado()" class="btn btn-danger btn-lg">Submeter Risco</button>
     </div>
   </div>
 
-  <script>
-    const API_URL = "SUA_URL_DO_GOOGLE_SCRIPT_AQUI"; //
-    let currUser = null, allData = [], bufferImages = [];
+</div>
 
-    async function callBackend(action, payload = {}) {
-      const url = `${API_URL}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&userJson=${encodeURIComponent(JSON.stringify(currUser))}`;
-      if (action === 'saveRisk') {
-        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action, payload, userJson: JSON.stringify(currUser) }) });
-        return { status: 'success' };
-      }
-      const res = await fetch(url);
-      return await res.json();
-    }
+<script>
+  let session = {};
 
-    async function doLogin() {
-      const u = document.getElementById('loginUser').value;
-      const p = document.getElementById('loginPass').value;
-      const res = await callBackend('login', { login: u, password: p });
-      if(res.status === 'success') { currUser = res; loadDash(); } else { alert("Erro login"); }
-    }
+  function fazerLogin() {
+    const u = document.getElementById('user').value;
+    const p = document.getElementById('pass').value;
+    google.script.run.withSuccessHandler(res => {
+      if(res.status === "success") {
+        session = res;
+        document.getElementById('box-login').classList.add('hidden');
+        if(res.role === "ADM") {
+          document.getElementById('box-adm').classList.remove('hidden');
+          atualizarPendentes();
+        } else {
+          document.getElementById('box-user').classList.remove('hidden');
+        }
+      } else { alert(res.message); }
+    }).realizarLogin(u, p);
+  }
 
-    async function loadDash() {
-      document.getElementById('view-login').classList.add('hidden');
-      document.getElementById('view-dashboard').classList.remove('hidden');
-      const data = await callBackend('getDashboard');
-      allData = [...data.pending, ...data.history];
-      document.getElementById('kpiOpen').innerText = data.stats.open;
-      document.getElementById('kpiWait').innerText = data.stats.wait;
-      document.getElementById('kpiClosed').innerText = data.stats.closed;
-      renderList(allData);
-    }
+  function abrirCadastro() {
+    document.getElementById('box-login').classList.add('hidden');
+    document.getElementById('box-cadastro').classList.remove('hidden');
+  }
 
-    function renderList(items) {
-      const container = document.getElementById('listContainer');
-      container.innerHTML = '';
-      items.forEach(item => {
-        const div = document.createElement('div');
-        div.className = `list-item-card status-${item.status.split(' ')[0]}`;
-        div.onclick = () => showDetails(item);
-        div.innerHTML = `<div class="fw-bold">PN: ${item.pn}</div><div class="small text-muted">${item.desc}</div>`;
-        container.appendChild(div);
+  function salvarUsuario() {
+    const obj = {
+      nome: document.getElementById('reg-nome').value,
+      login: document.getElementById('reg-login').value,
+      senha: document.getElementById('reg-pass').value,
+      departamento: document.getElementById('reg-dep').value
+    };
+    google.script.run.withSuccessHandler(msg => {
+      alert(msg);
+      location.reload();
+    }).registrarNovoUsuario(obj);
+  }
+
+  function atualizarPendentes() {
+    google.script.run.withSuccessHandler(lista => {
+      let html = '';
+      lista.forEach(u => {
+        html += `<div class="col-md-4"><div class="card p-3 mb-2">
+          <b>${u[1]}</b><br><small>${u[4]}</small>
+          <button onclick="aprovar('${u[0]}')" class="btn btn-sm btn-success mt-2">Aprovar</button>
+        </div></div>`;
       });
-    }
+      document.getElementById('lista-pendentes').innerHTML = html || "Nenhum usuário pendente.";
+    }).listarPendentes();
+  }
 
-    function showDetails(item) {
-      document.getElementById('detContent').innerHTML = `<b>Status:</b> ${item.status}<br><b>PN:</b> ${item.pn}<br><b>Desc:</b> ${item.desc}`;
-      const gallery = document.getElementById('detGallery');
-      gallery.innerHTML = '<h6 class="fw-bold mt-2">Evidências:</h6>';
-      if(item.photosOpen) {
-        item.photosOpen.split(',').forEach((link, i) => {
-          gallery.innerHTML += `<a href="${link}" target="_blank" class="btn-evidence">Ver Foto ${i+1}</a>`;
-        });
-      } else { gallery.innerHTML += '<p class="small text-muted">Sem anexos.</p>'; }
-      document.getElementById('modalDetails').classList.remove('hidden');
-    }
+  function aprovar(id) {
+    google.script.run.withSuccessHandler(() => atualizarPendentes()).aprovarUsuario(id);
+  }
 
-    function filterData(status, el) {
-      document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      renderList(allData.filter(i => i.status.includes(status)));
-    }
-
-    function closeModal() { document.getElementById('modalDetails').classList.add('hidden'); }
-  </script>
+  function enviarChamado() {
+    const dados = {
+      pn: document.getElementById('pn').value,
+      oc: document.getElementById('oc').value,
+      descricao: document.getElementById('desc').value,
+      destino: document.getElementById('destino').value,
+      criador: session.nome
+    };
+    google.script.run.withSuccessHandler(msg => {
+      alert(msg);
+      document.getElementById('pn').value = "";
+      document.getElementById('oc').value = "";
+      document.getElementById('desc').value = "";
+    }).enviarRisco(dados);
+  }
+</script>
 </body>
 </html>
