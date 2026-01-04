@@ -1,58 +1,267 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Guardiões ERP - GitHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardiões ERP - Qualidade</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style> /* Cole aqui todo o seu CSS original */ </style>
+  
+  <style>
+    body { background-color: #f8f9fa; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #333; }
+    .hidden { display: none !important; }
+    .kpi-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; }
+    .kpi-card:hover { transform: translateY(-5px); }
+    .kpi-number { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
+    .text-open { color: #dc3545; } .text-wait { color: #ffc107; } .text-closed { color: #198754; } 
+    .list-item-card { background: white; border-left: 5px solid #dee2e6; border-radius: 8px; margin-bottom: 12px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); cursor: pointer; }
+    .status-Aberto { border-left-color: #dc3545; } 
+    .status-Aguardando { border-left-color: #ffc107; } 
+    .status-Fechado { border-left-color: #198754; }
+    .status-Reprovado { border-left-color: #a00; background-color: #fff5f5; }
+    .floating-btn { position: fixed; bottom: 30px; right: 30px; border-radius: 50%; width: 60px; height: 60px; font-size: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; justify-content: center; border: none; }
+  </style>
 </head>
 <body>
+
+  <div id="view-login" class="container mt-5" style="max-width: 450px;">
+    <div class="card border-0 shadow-lg p-4">
+      <div class="text-center mb-4">
+        <h2 class="text-primary fw-bold"><i class="fas fa-shield-alt"></i> Guardiões</h2>
+        <p class="text-muted small">Qualidade & Segurança</p>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="text" id="loginUser" class="form-control" placeholder="Usuário">
+        <label>Usuário</label>
+      </div>
+      <div class="form-floating mb-4">
+        <input type="password" id="loginPass" class="form-control" placeholder="Senha">
+        <label>Senha</label>
+      </div>
+      <button onclick="doLogin()" id="btnLogin" class="btn btn-primary w-100 py-3 fw-bold">ACESSAR SISTEMA</button>
+    </div>
+  </div>
+
+  <div id="view-dashboard" class="hidden">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+      <div class="container">
+        <span class="navbar-brand fw-bold"><i class="fas fa-cube"></i> ERP QUALIDADE</span>
+        <div class="d-flex align-items-center text-white gap-3">
+          <span class="small">Olá, <b id="userName">Usuário</b></span>
+          <button onclick="logout()" class="btn btn-sm btn-outline-light"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="row g-3 mb-4">
+        <div class="col-4"><div class="kpi-card"><div id="kpiOpen" class="kpi-number text-open">0</div><div class="small text-muted fw-bold">ABERTOS</div></div></div>
+        <div class="col-4"><div class="kpi-card"><div id="kpiWait" class="kpi-number text-wait">0</div><div class="small text-muted fw-bold">VALIDAR</div></div></div>
+        <div class="col-4"><div class="kpi-card"><div id="kpiClosed" class="kpi-number text-closed">0</div><div class="small text-muted fw-bold">FECHADOS</div></div></div>
+      </div>
+
+      <div id="loadingDash" class="text-center p-5 hidden">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Sincronizando dados...</p>
+      </div>
+
+      <div id="dashboardContent">
+        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-exclamation-circle"></i> MINHAS PENDÊNCIAS</h6>
+        <div id="listPending"></div>
+        
+        <h6 class="text-muted fw-bold mt-4 mb-3"><i class="fas fa-history"></i> HISTÓRICO RECENTE</h6>
+        <div id="listHistory"></div>
+      </div>
+    </div>
+
+    <button onclick="openNewRisk()" class="btn btn-primary floating-btn">
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+
+  <div id="view-form" class="hidden container mt-3" style="max-width: 650px;">
+    <div class="card shadow border-0 p-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold m-0">Registrar Ocorrência</h4>
+        <button onclick="showDashView()" class="btn-close"></button>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label small fw-bold">Responsável pela Tratativa</label>
+        <select id="selAssigned" class="form-select bg-light"></select>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-6"><label class="small fw-bold">Part Number (PN)</label><input id="newPn" class="form-control"></div>
+        <div class="col-6"><label class="small fw-bold">Ordem (OC)</label><input id="newOc" class="form-control"></div>
+      </div>
+
+      <div class="mb-3">
+        <label class="small fw-bold">Descrição do Desvio</label>
+        <textarea id="newDesc" class="form-control" rows="4"></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label class="small fw-bold"><i class="fas fa-camera"></i> Evidências Fotográficas</label>
+        <input type="file" id="fOpen" multiple class="form-control" accept="image/*">
+      </div>
+
+      <div class="d-grid gap-2">
+        <button onclick="sendRisk()" id="btnSave" class="btn btn-success py-3 fw-bold">SALVAR OCORRÊNCIA</button>
+        <button onclick="showDashView()" class="btn btn-light">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // COLOQUE A URL DA SUA IMPLANTAÇÃO DO GOOGLE SCRIPT AQUI
-    const WEB_APP_URL = "SUA_URL_AQUI/exec";
+    /**
+     * CONFIGURAÇÃO DE COMUNICAÇÃO
+     */
+    const API_URL = "https://script.google.com/macros/s/AKfycbzQOOiNThkuniU0ZAOwtyTw4xXpBOBf85RdvoZt5lzTNbv1b5xEMkVctMx1ObNjXs8F/exec";
+    
+    let currUser = null;
+    let bufferImages = [];
 
-    let currUser=null, biData=null, charts={}, bufferOpen=[], bufferClose=[], bufferReprove=[];
-    let globalDashData={pending:[], history:[]}, currentDashFilter=null;
+    /**
+     * NÚCLEO DA API (FETCH)
+     */
+    async function callBackend(action, payload = {}) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Necessário para evitar bloqueio de redirecionamento do Google
+          body: JSON.stringify({
+            action: action,
+            payload: payload,
+            userJson: currUser ? JSON.stringify(currUser) : null
+          })
+        });
 
-    // Função para comunicar com o Google Script via POST
-    async function callAPI(action, payload = {}) {
-      const response = await fetch(WEB_APP_URL, {
-        method: "POST",
-        mode: "no-cors", // Necessário para Google Apps Script
-        body: JSON.stringify({ action, ...payload })
-      });
-      // Como o no-cors não permite ler a resposta diretamente, 
-      // o ideal é configurar o Google Script para aceitar CORS ou 
-      // usar um proxy. Para GitHub Pages, usamos a abordagem abaixo:
-      
-      // NOTA: Para ler a resposta real, o Google Script precisa de um tratamento 
-      // de redirecionamento. Vou simplificar a chamada:
-      return new Promise((resolve) => {
-         // Simulação de retorno ou use bibliotecas como gas-client
-         // Para produção real no GitHub, você deve usar o método fetch padrão:
-         fetch(WEB_APP_URL + "?action=" + action, { method: 'POST', body: JSON.stringify({ action, ...payload }) })
-         .then(r => r.json()).then(resolve);
-      });
-    }
-
-    // --- EXEMPLO DE FUNÇÃO ADAPTADA ---
-    async function doLogin(){
-      let u = document.getElementById('loginUser').value;
-      let p = document.getElementById('loginPass').value;
-      
-      const res = await callAPI('login', { login: u, password: p });
-      if(res.status === 'success') {
-          currUser = res;
-          document.getElementById('userName').innerText = res.name.split(' ')[0];
-          loadDash();
-      } else {
-          alert(res.message);
+        // Como o Google usa redirecionamento 302 com no-cors, não conseguimos ler o JSON diretamente
+        // no modo 'no-cors'. Para ler a resposta, a API precisa de parâmetros na URL ou um Proxy.
+        // Abaixo usamos um truque de fallback para ações que precisam de retorno imediato.
+        
+        if (action === 'login' || action === 'getDashboard' || action === 'getGuardians') {
+           // Para GETs e ações críticas, chamamos via URL para permitir retorno
+           const res = await fetch(`${API_URL}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&userJson=${encodeURIComponent(JSON.stringify(currUser))}`);
+           return await res.json();
+        }
+        
+        return { status: 'success' }; // Fallback para POSTs de gravação
+      } catch (e) {
+        console.error("Erro na chamada:", e);
+        return { status: 'error', message: 'Falha de conexão.' };
       }
     }
 
-    // ADAPTE AS OUTRAS FUNÇÕES (loadDash, saveRisk, etc.) SEGUINDO O PADRÃO AWAIT CALLAPI
+    /**
+     * FUNÇÕES DE INTERFACE
+     */
+    async function doLogin() {
+      const u = document.getElementById('loginUser').value;
+      const p = document.getElementById('loginPass').value;
+      const btn = document.getElementById('btnLogin');
+
+      if(!u || !p) return alert("Preencha os campos!");
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Autenticando...';
+
+      const res = await callBackend('login', { login: u, password: p });
+      
+      if(res.status === 'success') {
+        currUser = res;
+        document.getElementById('userName').innerText = res.name;
+        loadDash();
+      } else {
+        alert(res.message || "Usuário ou senha incorretos.");
+        btn.disabled = false;
+        btn.innerText = 'ACESSAR SISTEMA';
+      }
+    }
+
+    async function loadDash() {
+      hideAll();
+      document.getElementById('view-dashboard').classList.remove('hidden');
+      document.getElementById('loadingDash').classList.remove('hidden');
+      document.getElementById('dashboardContent').classList.add('hidden');
+
+      const data = await callBackend('getDashboard');
+      
+      document.getElementById('kpiOpen').innerText = data.stats.open;
+      document.getElementById('kpiWait').innerText = data.stats.wait;
+      document.getElementById('kpiClosed').innerText = data.stats.closed;
+
+      const renderList = (target, items) => {
+        const container = document.getElementById(target);
+        container.innerHTML = items.length ? '' : '<p class="text-muted small">Nenhum registro encontrado.</p>';
+        items.forEach(r => {
+          const statusClass = r.status.includes('Aberto') ? 'status-Aberto' : (r.status.includes('Aguardando') ? 'status-Aguardando' : 'status-Fechado');
+          container.innerHTML += `
+            <div class="list-item-card ${statusClass}">
+              <div class="d-flex justify-content-between small fw-bold mb-1">
+                <span>PN: ${r.pn}</span>
+                <span class="badge bg-light text-dark border">${r.status}</span>
+              </div>
+              <div class="small text-muted text-truncate">${r.desc}</div>
+              <div class="mt-2 text-end" style="font-size: 0.7rem;">Solicitado por: ${r.opener}</div>
+            </div>`;
+        });
+      };
+
+      renderList('listPending', data.pending);
+      renderList('listHistory', data.history);
+
+      document.getElementById('loadingDash').classList.add('hidden');
+      document.getElementById('dashboardContent').classList.remove('hidden');
+    }
+
+    async function openNewRisk() {
+      hideAll();
+      document.getElementById('view-form').classList.remove('hidden');
+      const guardians = await callBackend('getGuardians');
+      const sel = document.getElementById('selAssigned');
+      sel.innerHTML = guardians.map(g => `<option value="${g.label}">${g.label}</option>`).join('');
+    }
+
+    async function sendRisk() {
+      const btn = document.getElementById('btnSave');
+      const payload = {
+        form: {
+          assignedTo: document.getElementById('selAssigned').value,
+          pn: document.getElementById('newPn').value,
+          oc: document.getElementById('newOc').value,
+          desc: document.getElementById('newDesc').value,
+          photosData: JSON.stringify(bufferImages)
+        }
+      };
+
+      btn.disabled = true;
+      btn.innerText = 'ENVIANDO...';
+      
+      await callBackend('saveRisk', payload);
+      alert("Sucesso! Registro enviado.");
+      bufferImages = [];
+      loadDash();
+    }
+
+    /**
+     * UTILITÁRIOS
+     */
+    function hideAll() { document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden')); }
+    function showDashView() { hideAll(); document.getElementById('view-dashboard').classList.remove('hidden'); }
+    function logout() { location.reload(); }
+
+    // Gerenciador de Imagens (Base64)
+    document.getElementById('fOpen').onchange = (e) => {
+      bufferImages = [];
+      Array.from(e.target.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => bufferImages.push(ev.target.result);
+        reader.readAsDataURL(file);
+      });
+    };
   </script>
 </body>
 </html>
