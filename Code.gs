@@ -2,7 +2,6 @@ const SS = SpreadsheetApp.getActiveSpreadsheet();
 const SH_USUARIOS = SS.getSheetByName("Usuarios");
 const SH_RISCOS = SS.getSheetByName("Riscos");
 
-// Renderiza a interface
 function doGet() {
   return HtmlService.createTemplateFromFile('index').evaluate()
       .setTitle('ERP Riscos')
@@ -10,12 +9,10 @@ function doGet() {
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-// Autenticação
 function realizarLogin(login, senha) {
   if (login === "adm" && senha === "adm1274455") {
     return { status: "success", role: "ADM", nome: "Administrador Master" };
   }
-
   const dados = SH_USUARIOS.getDataRange().getValues();
   for (let i = 1; i < dados.length; i++) {
     if (dados[i][2] == login && dados[i][3] == senha) {
@@ -26,7 +23,6 @@ function realizarLogin(login, senha) {
   return { status: "error", message: "Credenciais incorretas." };
 }
 
-// Registro e Chamados
 function registrarNovoUsuario(obj) {
   const id = "U-" + new Date().getTime();
   SH_USUARIOS.appendRow([id, obj.nome, obj.login, obj.senha, obj.departamento, obj.whatsapp, "", "", "", "Pendente"]);
@@ -39,7 +35,6 @@ function enviarRisco(dados) {
   return "Risco registrado!";
 }
 
-// Funções de Fluxo (Tratativa e Aprovação)
 function listarMeusChamados(nome) {
   return SH_RISCOS.getDataRange().getValues().filter(r => r[2] === nome || r[3] === nome);
 }
@@ -48,8 +43,8 @@ function salvarTratativa(id, acao) {
   const dados = SH_RISCOS.getDataRange().getValues();
   for(let i=1; i<dados.length; i++) {
     if(dados[i][0] == id) {
-      SH_RISCOS.getRange(i+1, 9).setValue(acao); // Ação Imediata
-      SH_RISCOS.getRange(i+1, 8).setValue("Em Validação"); // Status
+      SH_RISCOS.getRange(i+1, 9).setValue(acao);
+      SH_RISCOS.getRange(i+1, 8).setValue("Em Validação");
       return "Tratativa salva!";
     }
   }
